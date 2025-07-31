@@ -1,7 +1,5 @@
 package com.mypdfviewer.screens
 
-import android.app.Application
-import android.graphics.Bitmap
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -18,7 +16,10 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.gestures.rememberTransformableState
+import androidx.compose.foundation.selection.triStateToggleable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import com.mypdfviewer.viewModel.PdfViewModel
 
 @Composable
@@ -37,24 +38,15 @@ fun PdfScreen(modifier: Modifier = Modifier, viewModel: PdfViewModel) {
     )
 
     Column(modifier = modifier.fillMaxSize()) {
-
-        Button(
-            onClick = { filePickerLauncher.launch(arrayOf("application/pdf")) },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp)
-        ) {
-            Text("Pick a PDF")
-        }
-
         bitmap?.let {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .weight(1f)
                     .transformable(
-                        state = rememberTransformableState { zoomChange, _, _ ->
+                        state = rememberTransformableState { zoomChange, panChange, _ ->
                             scale *= zoomChange
+
                         }
                     )
                     .graphicsLayer(
@@ -72,20 +64,46 @@ fun PdfScreen(modifier: Modifier = Modifier, viewModel: PdfViewModel) {
                         .clip(RoundedCornerShape(8.dp))
                 )
             }
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Button(onClick = { viewModel.prevPage(); scale = 1f }) {
+                    Text("Previous")
+                }
+                Button(onClick = { viewModel.clearBitMap() }) {
+                    Text("Home")
+                }
+                Button(onClick = { viewModel.nextPage(); scale = 1f }) {
+                    Text("Next")
+                }
+            }
+        } ?: run {
+            Button(
+                onClick = { filePickerLauncher.launch(arrayOf("application/pdf")) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(12.dp)
+            ) {
+                Text("Pick a PDF")
+            }
+
+            Button(
+                onClick = { filePickerLauncher.launch(arrayOf("application/msword",
+                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                    "application/vnd.oasis.opendocument.text",
+                    "application/vnd.google-apps.document")) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(12.dp)
+            ) {
+                Text("Pick a Docs")
+            }
         }
 
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
-            Button(onClick = { viewModel.prevPage(); scale = 1f }) {
-                Text("Previous")
-            }
-            Button(onClick = { viewModel.nextPage(); scale = 1f }) {
-                Text("Next")
-            }
-        }
+
     }
 }

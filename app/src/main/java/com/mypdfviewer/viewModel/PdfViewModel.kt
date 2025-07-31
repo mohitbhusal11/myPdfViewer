@@ -48,6 +48,10 @@ class PdfViewModel(app: Application): AndroidViewModel(app) {
         }
     }
 
+    fun clearBitMap(){
+        _bitmap.value = null
+    }
+
     fun nextPage() {
         if (currentPageIndex < pageCount - 1) showPage(currentPageIndex + 1)
     }
